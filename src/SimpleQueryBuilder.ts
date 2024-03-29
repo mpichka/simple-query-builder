@@ -11,7 +11,7 @@ export class SimpleQueryBuilder {
   private parameters: Map<string, any>;
 
   constructor() {
-    this.from = '';
+    this.from = "";
     this.unions = [];
     this.selects = [];
     this.joins = [];
@@ -19,7 +19,7 @@ export class SimpleQueryBuilder {
     this.orders = [];
     this.groups = [];
     this.havings = [];
-    this.pagination = '';
+    this.pagination = "";
     this.parameters = new Map();
   }
 
@@ -59,7 +59,7 @@ export class SimpleQueryBuilder {
   }
 
   public setPagination(value?: string) {
-    this.pagination = value || 'LIMIT :limit OFFSET :offset';
+    this.pagination = value || "LIMIT :limit OFFSET :offset";
     return this;
   }
 
@@ -76,54 +76,54 @@ export class SimpleQueryBuilder {
   }
 
   public get query() {
-    let selectParams = '';
-    let joinParams = '';
-    let whereParams = '';
-    let orderParams = '';
-    let groupParams = '';
-    let havingParams = '';
+    let selectParams = "";
+    let joinParams = "";
+    let whereParams = "";
+    let orderParams = "";
+    let groupParams = "";
+    let havingParams = "";
 
     if (this.selects.length) {
       if (this.selects.length > 1) {
         selectParams = this.selects
-          .map((s) => s.split(',').map((v) => v.trim()))
+          .map((s) => s.split(",").map((v) => v.trim()))
           .flat()
-          .join(', ');
+          .join(", ");
       } else {
         selectParams = this.selects[0];
       }
     }
 
     if (this.joins.length) {
-      joinParams = this.joins.join(' ');
+      joinParams = this.joins.join(" ");
     }
 
     if (this.wheres.length) {
-      whereParams = `WHERE ${this.wheres.join(' AND ')} `;
+      whereParams = `WHERE ${this.wheres.join(" AND ")} `;
     }
 
     if (this.orders.length) {
-      orderParams = `ORDER BY ${this.orders.join(', ')}`;
+      orderParams = `ORDER BY ${this.orders.join(", ")}`;
     }
 
     if (this.groups.length) {
-      groupParams = `GROUP BY ${this.groups.join(', ')}`;
+      groupParams = `GROUP BY ${this.groups.join(", ")}`;
     }
 
     if (this.havings.length) {
-      havingParams = `HAVING ${this.havings.join(' AND ')}`;
+      havingParams = `HAVING ${this.havings.join(" AND ")}`;
     }
 
-    let sql = '';
+    let sql = "";
 
     if (!this.unions.length && !this.selects.length) {
-      throw new Error('Empty select statement');
+      throw new Error("Empty select statement");
     }
 
     if (this.unions.length) {
-      sql += this.unions.join(' UNION ALL ');
+      sql += this.unions.join(" UNION ALL ");
     } else {
-      sql += `SELECT ${selectParams.length ? selectParams : '*'}\n`;
+      sql += `SELECT ${selectParams.length ? selectParams : "*"}\n`;
 
       if (this.from) {
         sql += `FROM ${this.from}\n`;
@@ -139,25 +139,25 @@ export class SimpleQueryBuilder {
       ${this.pagination}
     `;
 
-    return sql.replace(/\s+/gi, ' ').trim();
+    return sql.replace(/\s+/gi, " ").trim();
   }
 
-  public build() {
+  public build(): [string, any[]] {
     let parameterCount = 0;
     let parameterizedQuery = this.query;
     const parameters = [];
 
     if (this.parameters.size) {
       for (const [key, value] of this.parameters.entries()) {
-        parameterizedQuery = parameterizedQuery.replace(
+        parameterizedQuery = parameterizedQuery.replaceAll(
           `:${key}`,
-          `$${++parameterCount}`,
+          `$${++parameterCount}`
         );
         parameters.push(value);
       }
     }
 
-    parameterizedQuery += ';';
+    parameterizedQuery += ";";
 
     return [parameterizedQuery, parameters];
   }
